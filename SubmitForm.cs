@@ -8,18 +8,23 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json.Linq;
+using SendGrid.Helpers.Mail;
 namespace Company.Function
 {
     public static class SaveWebhook
     {
         [FunctionName("SubmitForm")]
+        
         public static IActionResult Run(
             [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "submit")] HttpRequest webhookReq,
             [CosmosDB(
                 databaseName: "codingzone-db",
                 collectionName: "codingzone",
                 ConnectionStringSetting = "CosmosDbConnectionString")]out dynamic  outputDocument,
-            ILogger log)
+            ILogger log,
+            [SendGrid(ApiKey = "SendGridApiKey")] IAsyncCollector<SendGridMessage> messageCollector
+            )
+            
         {
             log.LogInformation($"Webhook function processed a request at: {DateTime.Now}");
             string authHeader = webhookReq.Headers["Authorization"];
@@ -53,6 +58,22 @@ namespace Company.Function
                     log.LogInformation(e.Message);
                     outputDocument = requestBody;
                 }
+
+                var msg = new SendGridMessage()
+                {
+                    From = new EmailAddress(Environment.GetEnvironmentVariable("SenderEmail")),
+                    Subject = "Coding Zone new message",
+                    PlainTextContent = requestBody
+
+                };
+
+               
+                msg.AddTo(Environment.GetEnvironmentVariable("RecipientEmail"));
+
+                 messageCollector.AddAsync(msg);
+
+
+
 
                 return (ActionResult)new OkObjectResult(requestBody);
             }

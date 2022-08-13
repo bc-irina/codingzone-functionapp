@@ -72,7 +72,7 @@
         "KeyVaultName": "[toLower(concat(variables('baseNameNoDash'), '-kv-', variables('suffix')))]",
         "funcStorageName": "[tolower(concat(substring(variables('baseNameNoDash'), 0, min(length(variables('baseNameNoDash')),14)), 'stg', variables('suffix')))]",
         "serverFarmName": "[concat(substring(parameters('baseName'), 0, min(length(parameters('baseName')),14)), '-srv-', variables('suffix'))]",
-        "repoURL": "https://github.com/sequenceshift/azure-webhook-app.git"
+        "repoURL": "https://github.com/bc-irina/codingzone-functionapp.git"
     },
     "resources": [
         {
@@ -142,16 +142,7 @@
                             "name": "CosmosDbConnectionString",
                             "value": "[concat('AccountEndpoint=https://',parameters('databaseAccounts_webhooks_db_name'),'.documents.azure.com:443/;AccountKey=', listKeys(parameters('databaseAccounts_webhooks_db_name'),'2022-02-15-preview').primaryMasterKey)]"
                         },
-                        {
-                            "name": "ACCESS_KEY",
-                            "value": "[parameters('apiAccessKey')]"
-                        },{
-                            "name": "ACCESS_SECRET",
-                            "value": "[parameters('apiAccessSecret')]"
-                        },{
-                            "name": "USER_API_ENDPOINT",
-                            "value": "[parameters('apiEndpoint')]"
-                        },
+                       
                         {
                             "name": "WebHookAuth",
                             "value": "[concat('@Microsoft.KeyVault(SecretUri=',reference(resourceId('Microsoft.KeyVault/vaults/secrets', variables('KeyVaultName'), parameters('secretName'))).secretUriWithVersion,')')]"
@@ -295,7 +286,7 @@
                 "isVirtualNetworkFilterEnabled": false,
                 "virtualNetworkRules": [],
                 "disableKeyBasedMetadataWriteAccess": false,
-                "enableFreeTier": false,
+                "enableFreeTier": true,
                 "enableAnalyticalStorage": false,
                 "analyticalStorageConfiguration": {
                     "schemaType": "WellDefined"
@@ -350,7 +341,7 @@
             ],
             "properties": {
                 "resource": {
-                    "id": "outDatabase"
+                    "id": "codingzone-db"
                 }
             }
         },
