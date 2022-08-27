@@ -9,12 +9,14 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json.Linq;
 using SendGrid.Helpers.Mail;
+using Newtonsoft.Json;
+
 namespace Company.Function
 {
     public static class SaveWebhook
     {
         [FunctionName("SubmitForm")]
-        
+
         public static IActionResult Run(
             [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "submit")] HttpRequest webhookReq,
             [CosmosDB(
@@ -24,7 +26,7 @@ namespace Company.Function
             ILogger log,
             [SendGrid(ApiKey = "SendGridApiKey")] IAsyncCollector<SendGridMessage> messageCollector
             )
-            
+
         {
             log.LogInformation($"Webhook function processed a request at: {DateTime.Now}");
             string authHeader = webhookReq.Headers["Authorization"];
@@ -67,11 +69,24 @@ namespace Company.Function
 
                 };
 
-               
+
                 msg.AddTo(Environment.GetEnvironmentVariable("RecipientEmail"));
 
-                 messageCollector.AddAsync(msg);
 
+
+                messageCollector.AddAsync(msg);
+
+                // var jsond = JsonConvert.SerializeObject(outputDocument);
+                JObject json = JObject.Parse(requestBody);
+
+                var age = json["age"];
+                if (age != null)
+                {
+                    var email = json["email"].ToString();
+                    msg = SendM(email);
+                    messageCollector.AddAsync(msg);
+
+                }
 
 
 
@@ -82,6 +97,26 @@ namespace Company.Function
                 outputDocument = null;
                 return new UnauthorizedObjectResult("Unauthorized access Forbidden");
             }
+        }
+
+        private static SendGridMessage SendM(string email)
+        {
+            var msg = new SendGridMessage()
+            {
+                From = new EmailAddress(Environment.GetEnvironmentVariable("SenderEmail"), "Coding Zone Team"),
+                Subject = "Coding Zone: Thanks for your registration",
+            };
+
+            var path = "email-template.html";
+            string emailTemplate = File.ReadAllText(path);
+            msg.AddContent("text/html", emailTemplate);
+
+
+            msg.AddTo(email);
+
+            return msg;
+
+
         }
     }
 }
