@@ -19,6 +19,7 @@ namespace Company.Function
             [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "send/{email}")] HttpRequest req,
             ILogger log,
              [SendGrid(ApiKey = "SendGridApiKey")] IAsyncCollector<SendGridMessage> messageCollector,
+           
              string email
              )
         {
@@ -29,7 +30,7 @@ namespace Company.Function
                 Subject = "Coding Zone: Thanks for your registration",
             };
 
-            var path = $"{context.FunctionAppDirectory}/email-template.html";
+            var path = Directory.GetCurrentDirectory() +"/email-template.html";
             string emailTemplate = File.ReadAllText(path);
             msg.AddContent("text/html", emailTemplate);
 
