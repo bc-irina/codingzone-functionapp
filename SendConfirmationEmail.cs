@@ -6,7 +6,7 @@ using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using SendGrid.Helpers.Mail;
-
+using Microsoft.Extensions.Configuration;
 
 
 namespace Company.Function
@@ -17,9 +17,10 @@ namespace Company.Function
         [FunctionName("SendConfirmationEmail")]
         public static async Task<SendGridMessage> Run(
             [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "send/{email}")] HttpRequest req,
+            ExecutionContext context,
             ILogger log,
              [SendGrid(ApiKey = "SendGridApiKey")] IAsyncCollector<SendGridMessage> messageCollector,
-           
+          
              string email
              )
         {
@@ -30,7 +31,7 @@ namespace Company.Function
                 Subject = "Coding Zone: Thanks for your registration",
             };
 
-            var path = Directory.GetCurrentDirectory() +"/email-template.html";
+            var path = $"email-template.html";
             string emailTemplate = File.ReadAllText(path);
             msg.AddContent("text/html", emailTemplate);
 
