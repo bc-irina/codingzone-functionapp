@@ -31,7 +31,7 @@ namespace Company.Function
                 Subject = "Coding Zone: Thanks for your registration",
             };
 
-            var path = $"email-template.html";
+            var path = $"{context.FunctionAppDirectory}/email-template.html";
             string emailTemplate = File.ReadAllText(path);
             msg.AddContent("text/html", emailTemplate);
 
