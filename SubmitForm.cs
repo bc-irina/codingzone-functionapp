@@ -24,6 +24,7 @@ namespace Company.Function
                 collectionName: "codingzone",
                 ConnectionStringSetting = "CosmosDbConnectionString")]out dynamic  outputDocument,
             ILogger log,
+               ExecutionContext context,
             [SendGrid(ApiKey = "SendGridApiKey")] IAsyncCollector<SendGridMessage> messageCollector
            
             )
@@ -78,16 +79,16 @@ namespace Company.Function
                 messageCollector.AddAsync(msg);
 
                
-                // JObject json = JObject.Parse(requestBody);
+                JObject json = JObject.Parse(requestBody);
 
-                // var age = json["age"];
-                // if (age != null)
-                // {
-                //     var email = json["email"].ToString();
-                //     msg = SendM(email);
-                //     messageCollector.AddAsync(msg);
+                var age = json["age"];
+                if (age != null)
+                {
+                    var email = json["email"].ToString();
+                    msg = SendM(email,context);
+                    messageCollector.AddAsync(msg);
 
-                // }
+                }
 
 
 
@@ -100,7 +101,7 @@ namespace Company.Function
             }
         }
 
-        private static SendGridMessage SendM(string email)
+        private static SendGridMessage SendM(string email, ExecutionContext context)
         {
             var msg = new SendGridMessage()
             {
@@ -108,7 +109,7 @@ namespace Company.Function
                 Subject = "Coding Zone: Thanks for your registration",
             };
 
-            var path = System.AppDomain.CurrentDomain.BaseDirectory + "email-template.html"; 
+            var path = $"{context.FunctionAppDirectory}/email-template.html";
             string emailTemplate = File.ReadAllText(path);
             msg.AddContent("text/html", emailTemplate);
 
