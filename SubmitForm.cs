@@ -81,7 +81,7 @@ namespace Company.Function
                
                 JObject json = JObject.Parse(requestBody);
 
-                var age = json["age"];
+                var age = json["camp"];
                 if (age != null)
                 {
                     var email = json["email"].ToString();
